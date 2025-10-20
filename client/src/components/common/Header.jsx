@@ -64,48 +64,51 @@ const Header = () => {
           </Link>
 
           {/* Navigation Buttons - Desktop */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className="hover:text-gold transition-colors font-medium">
-              Home
-            </Link>
-            <div className="relative">
-              <button
-                onClick={() => setCategoriesOpen(!categoriesOpen)}
-                className="hover:text-gold transition-colors font-medium flex items-center gap-1"
-              >
-                Categories
-                <ChevronDown size={16} className={`transition-transform ${categoriesOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {/* Categories Dropdown */}
-              {categoriesOpen && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-10" 
-                    onClick={() => setCategoriesOpen(false)}
-                  ></div>
-                  <div className="absolute top-full mt-2 left-0 bg-dark-card border border-dark-border rounded-lg shadow-lg py-2 min-w-[200px] z-20">
-                    {categories.map((category) => (
-                      <button
-                        key={category.name}
-                        onClick={() => handleCategoryClick(category.name)}
-                        className="w-full text-left px-4 py-2 hover:bg-dark-elevated hover:text-gold transition-colors flex items-center gap-3"
-                      >
-                        <span className="text-xl">{category.icon}</span>
-                        <span>{category.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+<nav className="hidden md:flex items-center gap-6">
+  <Link to="/" className="hover:text-gold transition-colors font-medium">
+    Home
+  </Link>
+  <div className="relative">
+    <button
+      onClick={() => setCategoriesOpen(!categoriesOpen)}
+      className="hover:text-gold transition-colors font-medium flex items-center gap-1"
+    >
+      Categories
+      <ChevronDown size={16} className={`transition-transform ${categoriesOpen ? 'rotate-180' : ''}`} />
+    </button>
+    
+    {/* Categories Dropdown */}
+    {categoriesOpen && (
+      <>
+        <div 
+          className="fixed inset-0 z-10" 
+          onClick={() => setCategoriesOpen(false)}
+        ></div>
+        <div className="absolute top-full mt-2 left-0 bg-dark-card border border-dark-border rounded-lg shadow-lg py-2 min-w-[200px] z-20">
+          {categories.map((category) => (
             <button
-              onClick={scrollToFooter}
-              className="hover:text-gold transition-colors font-medium"
+              key={category.name}
+              onClick={() => handleCategoryClick(category.name)}
+              className="w-full text-left px-4 py-2 hover:bg-dark-elevated hover:text-gold transition-colors flex items-center gap-3"
             >
-              About
+              <span className="text-xl">{category.icon}</span>
+              <span>{category.name}</span>
             </button>
-          </nav>
+          ))}
+        </div>
+      </>
+    )}
+  </div>
+  <Link to="/custom-design" className="hover:text-gold transition-colors font-medium">
+    Custom Design
+  </Link>
+  <button
+    onClick={scrollToFooter}
+    className="hover:text-gold transition-colors font-medium"
+  >
+    About
+  </button>
+</nav>
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">

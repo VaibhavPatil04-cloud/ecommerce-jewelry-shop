@@ -201,22 +201,22 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-gold-dark to-gold">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-dark-bg mb-4">
-            Can't Find What You're Looking For?
-          </h2>
-          <p className="text-dark-bg/80 text-lg mb-8 max-w-2xl mx-auto">
-            Let our expert craftsmen create a custom piece just for you. From engagement rings to family heirlooms.
-          </p>
-          <a
-            href="#"
-            className="inline-block bg-dark-bg hover:bg-dark-card text-gold font-medium px-8 py-3 rounded-lg transition-colors"
-          >
-            Request Custom Design
-          </a>
-        </div>
-      </section>
+<section className="py-16 bg-gradient-to-r from-gold-dark to-gold">
+  <div className="container mx-auto px-4 text-center">
+    <h2 className="text-3xl md:text-4xl font-bold text-dark-bg mb-4">
+      Can't Find What You're Looking For?
+    </h2>
+    <p className="text-dark-bg/80 text-lg mb-8 max-w-2xl mx-auto">
+      Let our expert craftsmen create a custom piece just for you. From engagement rings to family heirlooms.
+    </p>
+    <Link
+      to="/custom-design"
+      className="inline-block bg-dark-bg hover:bg-dark-card text-gold font-medium px-8 py-3 rounded-lg transition-colors"
+    >
+      Request Custom Design
+    </Link>
+  </div>
+</section>
     </div>
   )
 }
