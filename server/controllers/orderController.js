@@ -1,3 +1,4 @@
+// server/controllers/orderController.js
 import Order from '../models/Order.js'
 import Cart from '../models/Cart.js'
 
@@ -73,6 +74,54 @@ export const getOrderById = async (req, res) => {
     // Check if user owns the order or is admin
     if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Not authorized' })
+    }
+
+    res.json({
+      success: true,
+      order,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+
+// @desc    Get all orders (Admin)
+// @route   GET /api/orders/all
+// @access  Private/Admin
+export const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({})
+      .populate('user', 'name email phone')
+      .populate('items.product')
+      .sort({ createdAt: -1 })
+
+    res.json({
+      success: true,
+      count: orders.length,
+      orders,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+
+// @desc    Update order status (Admin)
+// @route   PUT /api/orders/:id/status
+// @access  Private/Admin
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    )
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' })
     }
 
     res.json({

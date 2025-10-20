@@ -1,3 +1,4 @@
+// client/src/services/api.js
 import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
@@ -39,6 +40,9 @@ export const productAPI = {
   searchProducts: (query) => api.get(`/products/search?q=${query}`),
   getByCategory: (category) => api.get(`/products/category/${category}`),
   filterProducts: (filters) => api.get('/products/filter', { params: filters }),
+  createProduct: (productData) => api.post('/products', productData),
+  updateProduct: (id, productData) => api.put(`/products/${id}`, productData),
+  deleteProduct: (id) => api.delete(`/products/${id}`),
 }
 
 // Cart API calls
@@ -55,6 +59,8 @@ export const orderAPI = {
   createOrder: (orderData) => api.post('/orders', orderData),
   getUserOrders: () => api.get('/orders/user'),
   getOrderById: (orderId) => api.get(`/orders/${orderId}`),
+  getAllOrders: () => api.get('/orders/all'), // Admin only
+  updateOrderStatus: (orderId, status) => api.put(`/orders/${orderId}/status`, { status }), // Admin only
 }
 
 export default api

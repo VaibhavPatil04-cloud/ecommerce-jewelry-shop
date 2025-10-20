@@ -1,3 +1,4 @@
+// client/src/App.jsx
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/common/Header'
@@ -9,6 +10,7 @@ import Login from './components/auth/Login'
 import Register from './components/auth/Register'
 import ShoppingCart from './components/cart/ShoppingCart'
 import OrderConfirmation from './pages/OrderConfirmation'
+import AdminPanel from './pages/AdminPanel'
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
             <Route path='/register' element={<Register />} />
             <Route path='/cart' element={<ShoppingCart />} />
             <Route path='/order-confirmation/:orderId' element={<OrderConfirmation />} />
+            <Route path='/admin' element={<AdminPanel />} />
           </Routes>
         </main>
         <Footer />

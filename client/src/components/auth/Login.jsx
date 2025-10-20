@@ -92,6 +92,13 @@ const Login = () => {
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
+
+            {/* Admin Demo Info */}
+            <div className="mt-4 p-3 bg-dark-elevated border border-dark-border rounded-lg">
+              <p className="text-xs text-gray-400 text-center">
+                <span className="font-semibold text-gold">Admin Demo:</span> admin@patiljewellers.com / admin123
+              </p>
+            </div>
           </form>
 
           <p className="text-center mt-6 text-sm text-gray-400">
