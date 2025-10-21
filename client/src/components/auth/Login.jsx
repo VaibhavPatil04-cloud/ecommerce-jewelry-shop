@@ -49,8 +49,8 @@ const Login = () => {
     setLoading(true)
     
     const result = await login({
-      email: 'admin@patiljewellers.com',
-      password: 'admin123'
+      email: 'vaibhav@gmail.com',
+      password: '123456'
     })
     
     if (result.success) {
@@ -126,8 +126,8 @@ const Login = () => {
                 <span className="font-semibold text-gold">Admin Demo Credentials:</span>
               </p>
               <div className="text-xs text-gray-400 space-y-1 mb-3">
-                <p>Email: <span className="text-white">admin@patiljewellers.com</span></p>
-                <p>Password: <span className="text-white">admin123</span></p>
+                <p>Email: <span className="text-white">vaibhav@gmail.com</span></p>
+                <p>Password: <span className="text-white">123456</span></p>
               </div>
               <button
                 type="button"
