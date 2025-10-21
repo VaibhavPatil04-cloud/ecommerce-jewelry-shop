@@ -1,9 +1,13 @@
 // client/src/pages/AdminPanel.jsx
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Edit, Trash2, ShoppingBag, X, Save, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Package, Plus, Edit, Trash2, ShoppingBag, X, Save, Eye, LogOut } from 'lucide-react';
 import { productAPI, orderAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const AdminPanel = () => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -11,6 +15,21 @@ const AdminPanel = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Check if user is admin
+  useEffect(() => {
+    if (!isAuthenticated) {
+      alert('Please login as admin to access this page');
+      navigate('/login');
+      return;
+    }
+
+    if (user?.role !== 'admin') {
+      alert('Access denied. Admin privileges required.');
+      navigate('/');
+      return;
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -36,13 +55,16 @@ const AdminPanel = () => {
       setProducts(response.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      if (error.response?.status === 403) {
+        alert('Access denied. Please login as admin.');
+        navigate('/login');
+      }
     }
   };
 
   // Fetch orders
   const fetchOrders = async () => {
     try {
-      // Replace with actual admin orders endpoint
       const response = await orderAPI.getUserOrders();
       setOrders(response.data.orders || []);
     } catch (error) {
@@ -51,9 +73,11 @@ const AdminPanel = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
-    fetchOrders();
-  }, []);
+    if (isAuthenticated && user?.role === 'admin') {
+      fetchProducts();
+      fetchOrders();
+    }
+  }, [isAuthenticated, user]);
 
   const handleProductSubmit = async (e) => {
     e.preventDefault();
@@ -61,11 +85,9 @@ const AdminPanel = () => {
     
     try {
       if (editingProduct) {
-        // Update product API call
         await productAPI.updateProduct(editingProduct._id, productForm);
         alert('Product updated successfully!');
       } else {
-        // Create product API call
         await productAPI.createProduct(productForm);
         alert('Product added successfully!');
       }
@@ -74,7 +96,8 @@ const AdminPanel = () => {
       resetForm();
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Error saving product. Please try again.');
+      const errorMessage = error.response?.data?.message || 'Error saving product. Please try again.';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -129,6 +152,29 @@ const AdminPanel = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Don't render if not admin
+  if (!isAuthenticated || user?.role !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
+          <p className="text-gray-400 mb-6">You need admin privileges to access this page</p>
+          <button
+            onClick={() => navigate('/')}
+            className="bg-gold text-dark-bg px-6 py-2 rounded-lg"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-dark-bg text-gray-100">
       {/* Header */}
@@ -136,8 +182,15 @@ const AdminPanel = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gold">Patil Jewellers Admin</h1>
-            <p className="text-sm text-gray-400">Manage your jewelry store</p>
+            <p className="text-sm text-gray-400">Welcome, {user?.name}</p>
           </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <LogOut size={18} />
+            Logout
+          </button>
         </div>
       </div>
 
@@ -294,7 +347,7 @@ const AdminPanel = () => {
               </button>
             </div>
             
-            <div className="p-6">
+            <form onSubmit={handleProductSubmit} className="p-6">
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
@@ -409,7 +462,7 @@ const AdminPanel = () => {
 
                 <div className="flex gap-3 pt-4">
                   <button
-                    onClick={handleProductSubmit}
+                    type="submit"
                     disabled={loading}
                     className="flex-1 bg-gold hover:bg-gold-dark text-dark-bg py-3 rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50"
                   >
@@ -417,6 +470,7 @@ const AdminPanel = () => {
                     {loading ? 'Saving...' : (editingProduct ? 'Update Product' : 'Add Product')}
                   </button>
                   <button
+                    type="button"
                     onClick={resetForm}
                     className="px-6 bg-dark-elevated hover:bg-dark-border text-white py-3 rounded-lg font-medium"
                   >
@@ -424,7 +478,7 @@ const AdminPanel = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}

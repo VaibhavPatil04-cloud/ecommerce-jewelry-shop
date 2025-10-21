@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 const Login = () => {
@@ -11,6 +11,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleChange = (e) => {
     setFormData({
@@ -27,7 +28,33 @@ const Login = () => {
     const result = await login(formData)
     
     if (result.success) {
-      navigate('/')
+      // Redirect to the page they tried to access or home
+      const from = location.state?.from || '/'
+      
+      // If admin, redirect to admin panel
+      if (result.user?.role === 'admin') {
+        navigate('/admin')
+      } else {
+        navigate(from)
+      }
+    } else {
+      setError(result.message)
+    }
+    
+    setLoading(false)
+  }
+
+  const handleAdminQuickLogin = async () => {
+    setError('')
+    setLoading(true)
+    
+    const result = await login({
+      email: 'admin@patiljewellers.com',
+      password: 'admin123'
+    })
+    
+    if (result.success) {
+      navigate('/admin')
     } else {
       setError(result.message)
     }
@@ -94,10 +121,22 @@ const Login = () => {
             </button>
 
             {/* Admin Demo Info */}
-            <div className="mt-4 p-3 bg-dark-elevated border border-dark-border rounded-lg">
-              <p className="text-xs text-gray-400 text-center">
-                <span className="font-semibold text-gold">Admin Demo:</span> admin@patiljewellers.com / admin123
+            <div className="mt-4 p-4 bg-dark-elevated border border-dark-border rounded-lg">
+              <p className="text-xs text-gray-400 text-center mb-3">
+                <span className="font-semibold text-gold">Admin Demo Credentials:</span>
               </p>
+              <div className="text-xs text-gray-400 space-y-1 mb-3">
+                <p>Email: <span className="text-white">admin@patiljewellers.com</span></p>
+                <p>Password: <span className="text-white">admin123</span></p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAdminQuickLogin}
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 rounded transition-colors disabled:opacity-50"
+              >
+                Quick Login as Admin
+              </button>
             </div>
           </form>
 

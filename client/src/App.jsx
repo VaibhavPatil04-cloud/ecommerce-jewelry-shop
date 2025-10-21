@@ -3,6 +3,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/common/Header'
 import Footer from './components/common/Footer'
+import ProtectedRoute from './components/common/ProtectedRoute'
 import Home from './pages/Home'
 import Collections from './pages/Collections'
 import ProductPage from './pages/ProductPage'
@@ -26,9 +27,34 @@ function App() {
             <Route path='/custom-design' element={<CustomDesign />} />
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
-            <Route path='/cart' element={<ShoppingCart />} />
-            <Route path='/order-confirmation/:orderId' element={<OrderConfirmation />} />
-            <Route path='/admin' element={<AdminPanel />} />
+            
+            {/* Protected Routes - Require Login */}
+            <Route 
+              path='/cart' 
+              element={
+                <ProtectedRoute>
+                  <ShoppingCart />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path='/order-confirmation/:orderId' 
+              element={
+                <ProtectedRoute>
+                  <OrderConfirmation />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin Only Route */}
+            <Route 
+              path='/admin' 
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminPanel />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </main>
         <Footer />

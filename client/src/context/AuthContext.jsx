@@ -1,3 +1,4 @@
+// client/src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from 'react'
 import { authAPI } from '../services/api'
 
@@ -28,8 +29,10 @@ export const AuthProvider = ({ children }) => {
         setUser(response.data.user)
         setIsAuthenticated(true)
       } catch (error) {
+        console.error('Auth check failed:', error)
         localStorage.removeItem('token')
         setIsAuthenticated(false)
+        setUser(null)
       }
     }
     setLoading(false)
@@ -39,14 +42,20 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.login(credentials)
       const { token, user } = response.data
+      
       localStorage.setItem('token', token)
       setUser(user)
       setIsAuthenticated(true)
-      return { success: true }
+      
+      return { 
+        success: true,
+        user: user 
+      }
     } catch (error) {
+      console.error('Login error:', error)
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+        message: error.response?.data?.message || 'Login failed. Please check your credentials.' 
       }
     }
   }
@@ -55,14 +64,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.register(userData)
       const { token, user } = response.data
+      
       localStorage.setItem('token', token)
       setUser(user)
       setIsAuthenticated(true)
+      
       return { success: true }
     } catch (error) {
+      console.error('Registration error:', error)
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Registration failed' 
+        message: error.response?.data?.message || 'Registration failed. Please try again.' 
       }
     }
   }
