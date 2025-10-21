@@ -93,12 +93,12 @@ const Home = () => {
                 Shop Collection
                 <ArrowRight size={20} />
               </Link>
-              <a
-                href="#"
+              <Link
+                to="/custom-design"
                 className="border border-gold text-gold hover:bg-gold hover:text-dark-bg font-medium px-8 py-3 rounded-lg transition-colors"
               >
                 Custom Design
-              </a>
+              </Link>
             </div>
           </div>
         </div>
