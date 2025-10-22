@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import connectDB from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
 import productRoutes from './routes/productRoutes.js'
+import cartRoutes from './routes/cartRoutes.js'  // ADD THIS LINE
 import orderRoutes from './routes/orderRoutes.js'
 
 dotenv.config()
@@ -17,7 +18,7 @@ connectDB()
 app.use(cors({
      origin: [
        'http://localhost:3000',
-       'https://ecommerce-jewelry-shop-1.onrender.com'  // Add your frontend URL
+       'https://ecommerce-jewelry-shop-1.onrender.com'
      ],
      credentials: true
    }))
@@ -27,6 +28,7 @@ app.use(express.urlencoded({ extended: true }))
 // Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/products', productRoutes)
+app.use('/api/cart', cartRoutes)  // ADD THIS LINE
 app.use('/api/orders', orderRoutes)
 
 // Health check route

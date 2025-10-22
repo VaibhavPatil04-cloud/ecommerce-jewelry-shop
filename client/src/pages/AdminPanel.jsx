@@ -1,12 +1,12 @@
 // client/src/pages/AdminPanel.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Plus, Edit, Trash2, ShoppingBag, X, Save, Eye, LogOut } from 'lucide-react';
+import { Package, Plus, Edit, Trash2, ShoppingBag, X, Save, Eye } from 'lucide-react';
 import { productAPI, orderAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const AdminPanel = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
@@ -152,11 +152,6 @@ const AdminPanel = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   // Don't render if not admin
   if (!isAuthenticated || user?.role !== 'admin') {
     return (
@@ -184,13 +179,6 @@ const AdminPanel = () => {
             <h1 className="text-2xl font-bold text-gold">Patil Jewellers Admin</h1>
             <p className="text-sm text-gray-400">Welcome, {user?.name}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
         </div>
       </div>
 
