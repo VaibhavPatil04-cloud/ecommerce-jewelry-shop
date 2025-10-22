@@ -269,7 +269,7 @@ const AdminPanel = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(product)}
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded flex items-center justify-center gap-2"
+                          className="bg-gold hover:bg-gold-dark text-dark-bg px-4 py-2 rounded-lg flex items-center gap-2 font-medium"
                         >
                           <Edit size={16} />
                           Edit
