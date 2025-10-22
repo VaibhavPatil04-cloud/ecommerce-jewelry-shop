@@ -133,7 +133,7 @@ const Login = () => {
                 type="button"
                 onClick={handleAdminQuickLogin}
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 rounded transition-colors disabled:opacity-50"
+                className="w-full bg-gold hover:bg-gold-dark text-dark-bg text-sm py-2 rounded transition-colors disabled:opacity-50"
               >
                 Quick Login as Admin
               </button>
