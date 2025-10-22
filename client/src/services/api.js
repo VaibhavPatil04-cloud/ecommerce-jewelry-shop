@@ -25,6 +25,15 @@ api.interceptors.request.use(
   }
 )
 
+// Response interceptor for better error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error.response?.data || error.message)
+    return Promise.reject(error)
+  }
+)
+
 // Auth API calls
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
@@ -59,8 +68,8 @@ export const orderAPI = {
   createOrder: (orderData) => api.post('/orders', orderData),
   getUserOrders: () => api.get('/orders/user'),
   getOrderById: (orderId) => api.get(`/orders/${orderId}`),
-  getAllOrders: () => api.get('/orders/all'), // Admin only
-  updateOrderStatus: (orderId, status) => api.put(`/orders/${orderId}/status`, { status }), // Admin only
+  getAllOrders: () => api.get('/orders/all/orders'), // Fixed: matches backend route
+  updateOrderStatus: (orderId, status) => api.put(`/orders/${orderId}/status`, { status }),
 }
 
 export default api

@@ -1,12 +1,12 @@
 // client/src/pages/AdminPanel.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Plus, Edit, Trash2, ShoppingBag, X, Save, Eye, Upload, Link as LinkIcon } from 'lucide-react';
+import { Package, Plus, Edit, Trash2, ShoppingBag, X, Save, Eye, LogOut } from 'lucide-react';
 import { productAPI, orderAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const AdminPanel = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
@@ -15,7 +15,7 @@ const AdminPanel = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [imageInputMethod, setImageInputMethod] = useState('url'); // 'url' or 'file'
+  const [error, setError] = useState('');
 
   // Check if user is admin
   useEffect(() => {
@@ -45,9 +45,6 @@ const AdminPanel = () => {
     images: []
   });
 
-  const [imageUrls, setImageUrls] = useState(['']); // For URL input
-  const [imageFiles, setImageFiles] = useState([]); // For file upload
-
   const categories = ['Rings', 'Necklaces', 'Earrings', 'Bracelets', 'Bangles', 'Pendants', 'Sets'];
   const metalTypes = ['Gold', 'Silver', 'Platinum', 'Rose Gold', 'White Gold'];
   const orderStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
@@ -55,10 +52,12 @@ const AdminPanel = () => {
   // Fetch products
   const fetchProducts = async () => {
     try {
+      setError('');
       const response = await productAPI.getAllProducts();
       setProducts(response.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setError('Failed to load products');
       if (error.response?.status === 403) {
         alert('Access denied. Please login as admin.');
         navigate('/login');
@@ -69,51 +68,39 @@ const AdminPanel = () => {
   // Fetch orders - FIXED
   const fetchOrders = async () => {
     try {
-      const response = await orderAPI.getAllOrders(); // Changed from getUserOrders to getAllOrders
-      console.log('Orders fetched:', response.data); // Debug log
+      setError('');
+      console.log('Fetching orders...');
+      const response = await orderAPI.getAllOrders();
+      console.log('Orders response:', response.data);
       setOrders(response.data.orders || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      alert('Error fetching orders: ' + (error.response?.data?.message || 'Please try again'));
+      console.error('Error response:', error.response?.data);
+      setError('Failed to load orders: ' + (error.response?.data?.message || error.message));
     }
   };
 
   useEffect(() => {
     if (isAuthenticated && user?.role === 'admin') {
-      fetchProducts();
-      fetchOrders();
+      if (activeTab === 'products') {
+        fetchProducts();
+      } else if (activeTab === 'orders') {
+        fetchOrders();
+      }
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, activeTab]);
 
   const handleProductSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     
     try {
-      // Prepare images array
-      let finalImages = [];
-      
-      if (imageInputMethod === 'url') {
-        // Filter out empty URLs
-        finalImages = imageUrls.filter(url => url.trim() !== '');
-      } else {
-        // For file upload, you would need to upload to a service like Cloudinary
-        // For now, we'll use placeholder URLs
-        finalImages = imageFiles.map((file, index) => 
-          URL.createObjectURL(file) // Temporary - replace with actual upload
-        );
-      }
-
-      const productData = {
-        ...productForm,
-        images: finalImages
-      };
-
       if (editingProduct) {
-        await productAPI.updateProduct(editingProduct._id, productData);
+        await productAPI.updateProduct(editingProduct._id, productForm);
         alert('Product updated successfully!');
       } else {
-        await productAPI.createProduct(productData);
+        await productAPI.createProduct(productForm);
         alert('Product added successfully!');
       }
       
@@ -122,6 +109,7 @@ const AdminPanel = () => {
     } catch (error) {
       console.error('Error saving product:', error);
       const errorMessage = error.response?.data?.message || 'Error saving product. Please try again.';
+      setError(errorMessage);
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -141,16 +129,12 @@ const AdminPanel = () => {
       featured: false,
       images: []
     });
-    setImageUrls(['']);
-    setImageFiles([]);
     setEditingProduct(null);
     setShowAddProduct(false);
-    setImageInputMethod('url');
   };
 
   const handleEdit = (product) => {
     setProductForm(product);
-    setImageUrls(product.images && product.images.length > 0 ? product.images : ['']);
     setEditingProduct(product);
     setShowAddProduct(true);
   };
@@ -177,27 +161,13 @@ const AdminPanel = () => {
       alert('Order status updated!');
     } catch (error) {
       console.error('Error updating order:', error);
-      alert('Error updating order status.');
+      alert('Error updating order status: ' + (error.response?.data?.message || error.message));
     }
   };
 
-  const addImageUrlInput = () => {
-    setImageUrls([...imageUrls, '']);
-  };
-
-  const removeImageUrlInput = (index) => {
-    setImageUrls(imageUrls.filter((_, i) => i !== index));
-  };
-
-  const handleImageUrlChange = (index, value) => {
-    const newUrls = [...imageUrls];
-    newUrls[index] = value;
-    setImageUrls(newUrls);
-  };
-
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    setImageFiles(files);
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   // Don't render if not admin
@@ -227,8 +197,22 @@ const AdminPanel = () => {
             <h1 className="text-2xl font-bold text-gold">Patil Jewellers Admin</h1>
             <p className="text-sm text-gray-400">Welcome, {user?.name}</p>
           </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <LogOut size={18} />
+            Logout
+          </button>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500 text-red-500 rounded-lg p-4 m-6">
+          {error}
+        </div>
+      )}
 
       <div className="flex">
         {/* Sidebar */}
@@ -323,9 +307,9 @@ const AdminPanel = () => {
               <h2 className="text-2xl font-bold mb-6">Order Management</h2>
               
               {orders.length === 0 ? (
-                <div className="text-center py-12 bg-dark-card rounded-lg border border-dark-border">
+                <div className="text-center py-16">
                   <ShoppingBag size={64} className="mx-auto text-gray-600 mb-4" />
-                  <p className="text-gray-400">No orders found</p>
+                  <p className="text-gray-400">No orders yet</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -335,19 +319,13 @@ const AdminPanel = () => {
                         <div>
                           <h3 className="font-bold text-lg">Order #{order._id.slice(-8)}</h3>
                           <p className="text-sm text-gray-400">
-                            {new Date(order.createdAt).toLocaleDateString('en-IN', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                            {new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString()}
                           </p>
                         </div>
                         <select
                           value={order.status}
                           onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                          className="bg-dark-elevated border border-dark-border rounded px-3 py-1 text-sm capitalize"
+                          className="bg-dark-elevated border border-dark-border rounded px-3 py-1 text-sm"
                         >
                           {orderStatuses.map(status => (
                             <option key={status} value={status}>{status}</option>
@@ -368,12 +346,21 @@ const AdminPanel = () => {
                           </div>
                         </div>
                         
+                        <div className="mb-4">
+                          <p className="text-sm text-gray-400 mb-2">Items ({order.items?.length || 0}):</p>
+                          {order.items?.map((item, idx) => (
+                            <div key={idx} className="text-sm text-gray-300">
+                              • {item.name} x{item.quantity} - ₹{(item.price * item.quantity).toLocaleString()}
+                            </div>
+                          ))}
+                        </div>
+                        
                         <button
                           onClick={() => setSelectedOrder(order)}
                           className="text-gold hover:text-gold-dark text-sm flex items-center gap-2"
                         >
                           <Eye size={16} />
-                          View Details
+                          View Full Details
                         </button>
                       </div>
                     </div>
@@ -387,9 +374,9 @@ const AdminPanel = () => {
 
       {/* Add/Edit Product Modal */}
       {showAddProduct && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-dark-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-dark-border my-8">
-            <div className="flex justify-between items-center p-6 border-b border-dark-border sticky top-0 bg-dark-card z-10">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-card rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-dark-border">
+            <div className="flex justify-between items-center p-6 border-b border-dark-border">
               <h3 className="text-xl font-bold">{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
               <button onClick={resetForm} className="text-gray-400 hover:text-white">
                 <X size={24} />
@@ -419,94 +406,6 @@ const AdminPanel = () => {
                       className="w-full bg-dark-elevated border border-dark-border rounded px-4 py-2 h-24 focus:outline-none focus:border-gold"
                       placeholder="Product description..."
                     />
-                  </div>
-
-                  {/* Image Input Section */}
-                  <div className="col-span-2 border-t border-dark-border pt-4">
-                    <label className="block text-sm font-medium mb-2">Product Images</label>
-                    
-                    {/* Toggle between URL and File upload */}
-                    <div className="flex gap-2 mb-4">
-                      <button
-                        type="button"
-                        onClick={() => setImageInputMethod('url')}
-                        className={`flex-1 py-2 px-4 rounded flex items-center justify-center gap-2 ${
-                          imageInputMethod === 'url' 
-                            ? 'bg-gold text-dark-bg' 
-                            : 'bg-dark-elevated text-gray-400'
-                        }`}
-                      >
-                        <LinkIcon size={16} />
-                        Image URL
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setImageInputMethod('file')}
-                        className={`flex-1 py-2 px-4 rounded flex items-center justify-center gap-2 ${
-                          imageInputMethod === 'file' 
-                            ? 'bg-gold text-dark-bg' 
-                            : 'bg-dark-elevated text-gray-400'
-                        }`}
-                      >
-                        <Upload size={16} />
-                        Upload File
-                      </button>
-                    </div>
-
-                    {/* URL Input Method */}
-                    {imageInputMethod === 'url' && (
-                      <div className="space-y-2">
-                        {imageUrls.map((url, index) => (
-                          <div key={index} className="flex gap-2">
-                            <input
-                              type="url"
-                              value={url}
-                              onChange={(e) => handleImageUrlChange(index, e.target.value)}
-                              placeholder="https://example.com/image.jpg"
-                              className="flex-1 bg-dark-elevated border border-dark-border rounded px-4 py-2 focus:outline-none focus:border-gold"
-                            />
-                            {imageUrls.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => removeImageUrlInput(index)}
-                                className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded"
-                              >
-                                <X size={16} />
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={addImageUrlInput}
-                          className="text-gold hover:text-gold-dark text-sm flex items-center gap-1"
-                        >
-                          <Plus size={16} />
-                          Add another image URL
-                        </button>
-                      </div>
-                    )}
-
-                    {/* File Upload Method */}
-                    {imageInputMethod === 'file' && (
-                      <div>
-                        <input
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          className="w-full bg-dark-elevated border border-dark-border rounded px-4 py-2 focus:outline-none focus:border-gold"
-                        />
-                        <p className="text-xs text-gray-400 mt-2">
-                          Note: File upload creates temporary URLs. For production, integrate with a service like Cloudinary.
-                        </p>
-                        {imageFiles.length > 0 && (
-                          <div className="mt-2 text-sm text-gray-400">
-                            {imageFiles.length} file(s) selected
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   <div>
@@ -631,7 +530,7 @@ const AdminPanel = () => {
               </button>
             </div>
             
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-400">Order ID</p>
@@ -654,7 +553,7 @@ const AdminPanel = () => {
               <div className="border-t border-dark-border pt-4">
                 <h4 className="font-bold mb-3">Order Items</h4>
                 {selectedOrder.items?.map((item, index) => (
-                  <div key={index} className="flex justify-between py-2 border-b border-dark-border last:border-0">
+                  <div key={index} className="flex justify-between py-2">
                     <div>
                       <p className="font-medium">{item.name}</p>
                       <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
