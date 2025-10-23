@@ -507,10 +507,10 @@ const AdminPanel = () => {
         </div>
       )}
 
-      {/* Order Details Modal */}
+       {/* Order Details Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-dark-card rounded-lg max-w-2xl w-full border border-dark-border">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-dark-card rounded-lg max-w-3xl w-full border border-dark-border my-8">
             <div className="flex justify-between items-center p-6 border-b border-dark-border">
               <h3 className="text-xl font-bold">Order Details</h3>
               <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-white">
@@ -518,7 +518,8 @@ const AdminPanel = () => {
               </button>
             </div>
             
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+              {/* Order Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-400">Order ID</p>
@@ -529,28 +530,87 @@ const AdminPanel = () => {
                   <p className="font-medium capitalize">{selectedOrder.status}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Customer Name</p>
-                  <p className="font-medium">{selectedOrder.user?.name || 'N/A'}</p>
+                  <p className="text-sm text-gray-400">Order Date</p>
+                  <p className="font-medium">{new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Email</p>
-                  <p className="font-medium">{selectedOrder.user?.email || 'N/A'}</p>
+                  <p className="text-sm text-gray-400">Payment Method</p>
+                  <p className="font-medium uppercase">{selectedOrder.paymentMethod}</p>
                 </div>
               </div>
 
+              {/* Customer Info */}
               <div className="border-t border-dark-border pt-4">
-                <h4 className="font-bold mb-3">Order Items</h4>
-                {selectedOrder.items?.map((item, index) => (
-                  <div key={index} className="flex justify-between py-2">
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
-                    </div>
-                    <p className="font-medium">₹{(item.price * item.quantity).toLocaleString()}</p>
+                <h4 className="font-bold mb-3 text-gold">Customer Information</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-400">Name</p>
+                    <p className="font-medium">{selectedOrder.user?.name || selectedOrder.shippingAddress?.fullName || 'N/A'}</p>
                   </div>
-                ))}
+                  <div>
+                    <p className="text-sm text-gray-400">Email</p>
+                    <p className="font-medium">{selectedOrder.user?.email || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Phone</p>
+                    <p className="font-medium">{selectedOrder.shippingAddress?.phone || 'N/A'}</p>
+                  </div>
+                </div>
               </div>
 
+              {/* Shipping Address */}
+              <div className="border-t border-dark-border pt-4">
+                <h4 className="font-bold mb-3 text-gold">Shipping Address</h4>
+                {selectedOrder.shippingAddress ? (
+                  <div className="bg-dark-elevated p-4 rounded-lg">
+                    <p className="font-medium mb-1">{selectedOrder.shippingAddress.fullName}</p>
+                    <p className="text-gray-300">{selectedOrder.shippingAddress.street}</p>
+                    <p className="text-gray-300">
+                      {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}
+                    </p>
+                    <p className="text-gray-300">{selectedOrder.shippingAddress.country}</p>
+                    <p className="text-gray-400 text-sm mt-2">Phone: {selectedOrder.shippingAddress.phone}</p>
+                  </div>
+                ) : (
+                  <p className="text-gray-400">No shipping address available</p>
+                )}
+              </div>
+
+              {/* Order Items */}
+              <div className="border-t border-dark-border pt-4">
+                <h4 className="font-bold mb-3 text-gold">Order Items</h4>
+                <div className="space-y-3">
+                  {selectedOrder.items?.map((item, index) => (
+                    <div key={index} className="flex gap-4 bg-dark-elevated p-3 rounded-lg">
+                      {item.image && (
+                        <img 
+                          src={item.image} 
+                          alt={item.name}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-sm text-gray-400">Quantity: {item.quantity}</p>
+                        <p className="text-sm text-gray-400">Price: ₹{item.price.toLocaleString()}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gold">₹{(item.price * item.quantity).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Order Notes */}
+              {selectedOrder.orderNotes && (
+                <div className="border-t border-dark-border pt-4">
+                  <h4 className="font-bold mb-2 text-gold">Order Notes</h4>
+                  <p className="text-gray-300 bg-dark-elevated p-3 rounded-lg">{selectedOrder.orderNotes}</p>
+                </div>
+              )}
+
+              {/* Total */}
               <div className="border-t border-dark-border pt-4">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total Amount</span>
