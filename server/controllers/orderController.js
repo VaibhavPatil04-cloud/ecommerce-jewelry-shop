@@ -7,10 +7,25 @@ import Cart from '../models/Cart.js'
 // @access  Private
 export const createOrder = async (req, res) => {
   try {
-    const { items, totalAmount, shippingAddress, orderNotes } = req.body
+    const { items, totalAmount, shippingAddress, paymentMethod, orderNotes } = req.body
 
+    // Validate required fields
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'No order items' })
+    }
+
+    if (!shippingAddress) {
+      return res.status(400).json({ message: 'Shipping address is required' })
+    }
+
+    if (!paymentMethod) {
+      return res.status(400).json({ message: 'Payment method is required' })
+    }
+
+    // Validate shipping address fields
+    const { fullName, phone, street, city, state, zipCode, country } = shippingAddress
+    if (!fullName || !phone || !street || !city || !state || !zipCode || !country) {
+      return res.status(400).json({ message: 'Complete shipping address is required' })
     }
 
     const order = await Order.create({
@@ -18,6 +33,7 @@ export const createOrder = async (req, res) => {
       items,
       totalAmount,
       shippingAddress,
+      paymentMethod,
       orderNotes,
       status: 'confirmed',
     })
@@ -87,7 +103,7 @@ export const getOrderById = async (req, res) => {
 }
 
 // @desc    Get all orders (Admin)
-// @route   GET /api/orders/all
+// @route   GET /api/orders/all/orders
 // @access  Private/Admin
 export const getAllOrders = async (req, res) => {
   try {

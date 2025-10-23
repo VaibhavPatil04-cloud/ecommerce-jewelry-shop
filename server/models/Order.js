@@ -1,3 +1,4 @@
+// server/models/Order.js
 import mongoose from 'mongoose'
 
 const orderItemSchema = new mongoose.Schema({
@@ -38,14 +39,44 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      default: 'dummy',
+      required: true,
+      enum: ['cod', 'online', 'card', 'upi'],
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'completed', 'failed'],
+      default: 'pending',
     },
     shippingAddress: {
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: String,
+      fullName: {
+        type: String,
+        required: true,
+      },
+      phone: {
+        type: String,
+        required: true,
+      },
+      street: {
+        type: String,
+        required: true,
+      },
+      city: {
+        type: String,
+        required: true,
+      },
+      state: {
+        type: String,
+        required: true,
+      },
+      zipCode: {
+        type: String,
+        required: true,
+      },
+      country: {
+        type: String,
+        required: true,
+        default: 'India',
+      },
     },
     orderNotes: String,
   },

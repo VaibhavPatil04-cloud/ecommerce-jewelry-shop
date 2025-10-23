@@ -11,6 +11,7 @@ import CustomDesign from './pages/CustomDesign'
 import Login from './components/auth/Login'
 import Register from './components/auth/Register'
 import ShoppingCart from './components/cart/ShoppingCart'
+import Checkout from './pages/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
 import AdminPanel from './pages/AdminPanel'
 
@@ -34,6 +35,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ShoppingCart />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path='/checkout' 
+              element={
+                <ProtectedRoute>
+                  <Checkout />
                 </ProtectedRoute>
               } 
             />

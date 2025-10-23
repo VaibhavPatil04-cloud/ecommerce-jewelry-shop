@@ -1,15 +1,13 @@
-import React, { useState } from 'react'
+// client/src/components/cart/ShoppingCart.jsx
+import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
-import { orderAPI } from '../../services/api'
 import CartItem from './CartItem'
 
 const ShoppingCart = () => {
-  const { cart, cartTotal, cartCount, clearCart } = useCart()
+  const { cart, cartTotal, cartCount } = useCart()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
 
   if (cartCount === 0) {
     return (
@@ -32,56 +30,13 @@ const ShoppingCart = () => {
   const gst = cartTotal * 0.03
   const total = cartTotal + gst
 
-  const handleCheckout = async () => {
-    setLoading(true)
-    setError('')
-
-    try {
-      // Prepare order data
-      const orderData = {
-        items: cart.map(item => ({
-          product: item._id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          image: item.images?.[0] || ''
-        })),
-        totalAmount: total,
-        shippingAddress: {
-          street: '123 Main Street', // You can add a form for this
-          city: 'Mumbai',
-          state: 'Maharashtra',
-          zipCode: '400001',
-          country: 'India'
-        }
-      }
-
-      // Create order
-      const response = await orderAPI.createOrder(orderData)
-      
-      if (response.data.success) {
-        // Clear cart after successful order
-        await clearCart()
-        // Navigate to order confirmation
-        navigate(`/order-confirmation/${response.data.order._id}`)
-      }
-    } catch (err) {
-      console.error('Checkout error:', err)
-      setError(err.response?.data?.message || 'Failed to place order. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+  const handleProceedToCheckout = () => {
+    navigate('/checkout')
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Shopping Cart ({cartCount} items)</h1>
-
-      {error && (
-        <div className="bg-red-500/10 border border-red-500 text-red-500 rounded-lg p-4 mb-6">
-          {error}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
@@ -116,11 +71,10 @@ const ShoppingCart = () => {
             </div>
 
             <button
-              onClick={handleCheckout}
-              disabled={loading}
-              className="w-full bg-gold hover:bg-gold-dark text-dark-bg font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors mb-4 disabled:opacity-50"
+              onClick={handleProceedToCheckout}
+              className="w-full bg-gold hover:bg-gold-dark text-dark-bg font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors mb-4"
             >
-              {loading ? 'Processing...' : 'Proceed to Checkout'}
+              Proceed to Checkout
               <ArrowRight size={20} />
             </button>
 
